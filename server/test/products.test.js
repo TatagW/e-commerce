@@ -7,11 +7,25 @@ const expect = chai.expect
 
 describe('Products', function(){
     let product = null
-    let token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7Il9pZCI6IjVkODdhMDMxYjkzMDM2MjM1NzU4YjlhYyIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwidXNlcm5hbWUiOiJhZG1pbiJ9LCJpYXQiOjE1NjkxNjk0NTcsImV4cCI6MTU2OTE3MzA1N30.F-DSBJl3tR_uATTLWmWDUD2AFfDiLjU7NvxOalYpjhM'
-
+    const login = {
+        email: "admin@admin.com",
+        password: "admin"
+    }
+    let token = null
+    before(function(done){
+        chai.request(app)
+            .post('/users/loginform')
+            .send(login)
+            .end(function(err, res){
+                if(err)done(err)
+                else{
+                    token = res.body.token
+                    done()
+                }
+            })
+    })
     describe('/products with login', function(){
-        beforeEach(function(){
-            mongoose.connection.dropCollection('products')
+        beforeEach(function(done){
             product = {
                 title: "NB 990",
                 description: "The comfiest shoes evaaahhh",
@@ -20,6 +34,9 @@ describe('Products', function(){
                 brand: 'New Balance',
                 image: 'http://lelele'
             }
+            mongoose.connection.dropCollection('products', function(){
+                done()
+            })
         })
         it('should return the EMPTY image error', function(done){
             chai.request(app)
